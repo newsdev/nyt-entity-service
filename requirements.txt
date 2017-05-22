@@ -1,0 +1,7 @@
+Flask
+peewee
+psycopg2
+requests
+nyt-pyiap
+fuzzywuzzy
+python-Levenshtein
