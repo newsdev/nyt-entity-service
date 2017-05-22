@@ -29,7 +29,8 @@ There's also an admin interface for combining / deduplicating entities and for s
   "response": {
     "name": "Bank of America",
     "match_pct": 0.95,
-    "uuid": "ccb4e4c1-b3de-4688-b036-97550c717103"  
+    "uuid": "ccb4e4c1-b3de-4688-b036-97550c717103",
+    "created": false
   }
 }
 ```
