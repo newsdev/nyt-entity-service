@@ -40,4 +40,3 @@ There's also an admin interface for combining / deduplicating entities and for s
 * `force_create`, boolean: If `true`, will force the creation of a new entity despite the score. Default: `false`. **Note**: This will fail if the name is an EXACT match for another entity in the database. In this case, the exact matching entity will be returned.
 * `create_if_below`, float: If the fuzzy match score is below this threshold, a new entity will be created. Default: `0.80`
 * `dry_run`, boolean: If `true`, will return without committing any changes to the Entity database. Default: `false`.
-*
