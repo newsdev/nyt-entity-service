@@ -29,6 +29,18 @@ class Entity(BaseModel):
     id = UUIDField(primary_key=True)
     name = CharField(max_length=255, unique=True)
 
+    def to_dict(self):
+        payload = self.__dict__['_data']
+        payload['notes'] = self.notes_dict()
+
+        return payload
+
+    def notes(self):
+        return EntityNote.select().where(EntityNote.entity==str(self.id))
+
+    def notes_dict(self):
+        return [n.to_dict() for n in self.notes()]
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.id = str(uuid4())
@@ -40,10 +52,13 @@ class Entity(BaseModel):
 
 class EntityNote(BaseModel):
     id = UUIDField(primary_key=True)
-    entity = CharField(Entity, index=True)
+    entity = UUIDField(index=True)
     note = TextField(null=True)
 
-    def entity(self):
+    def to_dict(self):
+        return self.__dict__['_data']
+
+    def entity_obj(self):
         return Entity.get(Entity.id==self.entity)
 
     def save(self, *args, **kwargs):

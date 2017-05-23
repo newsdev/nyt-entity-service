@@ -42,18 +42,22 @@ def create_entity(response):
 
     user_email = request.environ['jwt_user_email'] or 'test@test.dev'
 
-    e = models.Entity.create(name=response['request']['name'])
-    en = models.EntityNote.create(entity=e.id,user_email=user_email)
+    e = models.Entity.create(name=response['request']['name'],user_email=user_email)
+    en = models.EntityNote.create(entity=e.id,user_email=user_email,note="Created by script.")
+
     response['response']['created'] = True
     response['response']['name'] = e.name
     response['response']['uuid'] = str(e.id)
-
-    print(response)
 
     return response
 
 @app.route('/', methods=['GET','POST'])
 def index():
+    if request.method == 'GET':
+        payload = [e.to_dict() for e in models.Entity.select()]
+
+        return jsonify(payload)
+
     if request.method == 'POST':
         payload = utils.clean_payload(dict(request.form))
 
@@ -65,8 +69,6 @@ def index():
 
         name = payload['name']
         score = 0
-
-        print(entity_list)
 
         if len(entity_list) > 0:
             name, score = process.extractOne(payload['name'], entity_list)
@@ -92,9 +94,6 @@ def index():
         response['response']['uuid'] = lookup[name]
 
         return jsonify(response)
-
-    user_email = request.environ['jwt_user_email'] or 'test@test.dev'
-    return Response(user_email, 400)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8008, debug=True)
