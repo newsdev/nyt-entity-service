@@ -14,7 +14,6 @@ There's also an admin interface for combining / deduplicating entities and for s
   "name": "Bank of America N.A.",
   "force_create": false,
   "create_if_below": 0.80,
-  "dry_run": false
 }
 ```
 ### Sample response
@@ -22,13 +21,11 @@ There's also an admin interface for combining / deduplicating entities and for s
 {
   "request": {
     "name": "Bank of America, N.A.",
-    "force_create": false,
-    "create_if_below": 0.80,
-    "dry_run": false
+    "create_if_below": 80,
   },
   "response": {
     "name": "Bank of America",
-    "match_pct": 0.95,
+    "score": 95,
     "uuid": "ccb4e4c1-b3de-4688-b036-97550c717103",
     "created": false
   }
@@ -38,6 +35,4 @@ There's also an admin interface for combining / deduplicating entities and for s
 * `entity`, string: The entity name, e.g., `Bank of America` or `Jared Kushner`.
 
 ### Optional fields
-* `force_create`, boolean: If `true`, will force the creation of a new entity despite the score. Default: `false`. **Note**: This will fail if the name is an EXACT match for another entity in the database. In this case, the exact matching entity will be returned.
-* `create_if_below`, float: If the fuzzy match score is below this threshold, a new entity will be created. Default: `0.80`
-* `dry_run`, boolean: If `true`, will return without committing any changes to the Entity database. Default: `false`.
+* `create_if_below`, integer: If the fuzzy match score is below this threshold, a new entity will be created. Default: `80`

@@ -18,6 +18,7 @@ except ImportError:
     import ConfigParser as configparser
 
 from flask import Flask, render_template, request, make_response, Response, redirect, jsonify
+from fuzzywuzzy import fuzz, process
 import peewee
 from peewee import *
 from pyiap.flask import VerifyJWTMiddleware
@@ -31,39 +32,69 @@ app = Flask(__name__, template_folder=settings.TEMPLATE_PATH)
 app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
 app.debug=settings.DEBUG
 
-def match_request_entity(payload, entity_list):
+models.database.connect()
+models.database.create_tables([models.Entity, models.EntityNote], safe=True)
+
+def create_entity(response):
     """
-    Testable unit of business logic for matching an entity.
+    Creates and returns an entity.
     """
 
-def create_request_entity(payload):
-    """
-    Testable unit of business logic for creating an entity.
-    """
+    user_email = request.environ['jwt_user_email'] or 'test@test.dev'
 
+    e = models.Entity.create(name=response['request']['name'])
+    en = models.EntityNote.create(entity=e.id,user_email=user_email)
+    response['response']['created'] = True
+    response['response']['name'] = e.name
+    response['response']['uuid'] = str(e.id)
+
+    print(response)
+
+    return response
 
 @app.route('/', methods=['GET','POST'])
 def index():
-
     if request.method == 'POST':
         payload = utils.clean_payload(dict(request.form))
 
-        if not payload['name']:
+        if not payload.get('name', None):
             return Response('bad request', 400)
 
-        entity_list = models.Entity.select('name')
-        m = match_request_entity(payload, entity_list)
+        lookup = dict([(e.name, e.id) for e in models.Entity.select()])
+        entity_list = list(lookup.keys())
 
-        if m:
-            return Response(jsonify(m), 200)
+        name = payload['name']
+        score = 0
 
-        if not m:
-            c = create_request_entity(payload)
+        print(entity_list)
 
-            if c:
-                return Response(jsonify(c), 200)
+        if len(entity_list) > 0:
+            name, score = process.extractOne(payload['name'], entity_list)
 
-    return Response('bad request', 400)
+        response = {}
+        response['request'] = {}
+        response['request']['name'] = payload['name']
+        response['request']['create_if_below'] = payload.get('create_if_below', settings.MINIMUM_SCORE)
+        response['response'] = {}
+        response['response']['score'] = score
+
+        if payload.get('create_if_below', None):
+            if score < int(payload['create_if_below']):
+                response = create_entity(response)
+                return jsonify(response)
+
+        if score < settings.MINIMUM_SCORE:
+            response = create_entity(response)
+            return jsonify(response)
+
+        response['response']['created'] = False
+        response['response']['name'] = name
+        response['response']['uuid'] = lookup[name]
+
+        return jsonify(response)
+
+    user_email = request.environ['jwt_user_email'] or 'test@test.dev'
+    return Response(user_email, 400)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8008, debug=True)

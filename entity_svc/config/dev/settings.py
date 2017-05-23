@@ -18,3 +18,5 @@ DATABASES = {
         }
     }
 }
+
+MINIMUM_SCORE = 80
