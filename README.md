@@ -12,8 +12,7 @@ There's also an admin interface for combining / deduplicating entities and for s
 ```
 {
   "name": "Bank of America N.A.",
-  "force_create": false,
-  "create_if_below": 0.80,
+  "create_if_below": 80,
 }
 ```
 ### Sample response
