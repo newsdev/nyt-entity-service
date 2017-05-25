@@ -29,7 +29,7 @@ import utils
 
 settings = importlib.import_module('config.%s.settings' % utils.get_env())
 app = Flask(__name__, template_folder=settings.TEMPLATE_PATH)
-app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
+# app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
 app.debug=settings.DEBUG
 
 models.database.connect()
