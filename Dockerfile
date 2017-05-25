@@ -21,4 +21,4 @@ COPY . /usr/src/app/
 ENV PYTHONPATH=/usr/src/app
 
 EXPOSE 80
-CMD ["kubernetes-secret-env", "/usr/local/bin/uwsgi", "--ini", "/usr/src/app/config/prd/docker.ini"]
+CMD ["kubernetes-secret-env", "/usr/local/bin/uwsgi", "--ini", "/usr/src/app/entity_svc/config/prd/docker.ini"]
