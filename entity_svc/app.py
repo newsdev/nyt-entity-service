@@ -51,6 +51,10 @@ def create_entity(response):
 
     return response
 
+@app.route('/healthcheck', methods=['GET'])
+def health():
+    return Response('ok')
+
 @app.route('/', methods=['GET','POST'])
 def index():
     if request.method == 'GET':
