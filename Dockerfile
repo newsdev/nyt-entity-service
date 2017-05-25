@@ -18,7 +18,7 @@ COPY requirements.txt /usr/src/app/
 RUN pip install -r /usr/src/app/requirements.txt
 COPY . /usr/src/app/
 
-ENV PYTHONPATH=/usr/src/app
+ENV PYTHONPATH=/usr/src/app/entitysvc
 
 EXPOSE 80
-CMD ["kubernetes-secret-env", "/usr/local/bin/uwsgi", "--ini", "/usr/src/app/entity_svc/config/prd/docker.ini"]
+CMD ["kubernetes-secret-env", "/usr/local/bin/uwsgi", "--ini", "/usr/src/app/entitysvc/config/prd/docker.ini"]
