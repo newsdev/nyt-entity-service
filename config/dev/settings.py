@@ -13,10 +13,10 @@ DATABASES = {
         'OPTIONS': {
             "database": os.environ.get('DB_NAME', "entitysvc_%s" % utils.get_env()),
             "user": os.environ.get('DB_USER', None),
-            "password": os.environ.get('DB_PASS', None),
+            "password": os.environ.get('DB_PASSWORD', None),
             "host": os.environ.get('DB_HOST', None),
         }
     }
 }
 
-MINIMUM_SCORE = 80
+MINIMUM_SCORE = int(os.environ.get('MINIMUM_SCORE', '80'))
