@@ -28,6 +28,7 @@ class BaseModel(Model):
 class Entity(BaseModel):
     id = UUIDField(primary_key=True)
     name = CharField(max_length=255, unique=True)
+    canonical_entity = TextField(null=True)
 
     def to_dict(self):
         payload = self.__dict__['_data']

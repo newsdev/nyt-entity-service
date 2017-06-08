@@ -21,7 +21,7 @@ from flask import Flask, render_template, request, make_response, Response, redi
 from fuzzywuzzy import fuzz, process
 import peewee
 from peewee import *
-from pyiap.flask import VerifyJWTMiddleware
+# from pyiap.flask import VerifyJWTMiddleware
 import requests
 
 import models
