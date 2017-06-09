@@ -21,7 +21,7 @@ from flask import Flask, render_template, request, make_response, Response, redi
 from fuzzywuzzy import fuzz, process
 import peewee
 from peewee import *
-# from pyiap.flask import VerifyJWTMiddleware
+from pyiap.pyiap_flask_middleware import VerifyJWTMiddleware
 import requests
 
 import models
@@ -29,7 +29,7 @@ import utils
 
 settings = importlib.import_module('config.%s.settings' % utils.get_env())
 app = Flask(__name__, template_folder=settings.TEMPLATE_PATH)
-# app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
+app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
 app.debug=settings.DEBUG
 
 @app.before_request
