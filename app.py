@@ -70,8 +70,7 @@ def health():
 @app.route('/', methods=['GET','POST'])
 def index():
     if request.method == 'GET':
-        payload = [e.to_dict() for e in models.Entity.select()]
-
+        payload = {"entities": [e.to_dict() for e in models.Entity.select()], "requester": request.environ.get('jwt_user_email', None) or 'fake@fake.dev'}
         return jsonify(payload)
 
     if request.method == 'POST':
