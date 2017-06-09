@@ -52,7 +52,7 @@ def create_entity(response):
     Creates and returns an entity.
     """
 
-    user_email = request.environ['jwt_user_email'] or 'test@test.dev'
+    user_email = request.environ.get('jwt_user_email', None) or 'test@test.dev'
 
     e = models.Entity.create(name=response['request']['name'],user_email=user_email)
     en = models.EntityNote.create(entity=e.id,user_email=user_email,note="Created by script.")
