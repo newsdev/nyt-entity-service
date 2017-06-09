@@ -2,6 +2,6 @@ Flask
 peewee
 psycopg2
 requests
--e git+git@github.com:newsdev/nyt-pyiap.git#egg=nyt-pyiap
+-e git+https://github.com/newsdev/nyt-pyiap.git#egg=nyt-pyiap
 fuzzywuzzy
 python-Levenshtein
