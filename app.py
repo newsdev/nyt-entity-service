@@ -29,7 +29,7 @@ import utils
 
 settings = importlib.import_module('config.%s.settings' % utils.get_env())
 app = Flask(__name__, template_folder=settings.TEMPLATE_PATH)
-app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
+# app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
 app.debug=settings.DEBUG
 
 @app.before_request
@@ -52,7 +52,7 @@ def create_entity(response):
     Creates and returns an entity.
     """
 
-    user_email = request.environ.get('jwt_user_email', None) or 'test@test.dev'
+    user_email = request.environ.get('HTTP_X_GOOG_AUTHENTICATED_USER_EMAIL', None) or 'test@test.dev'
 
     e = models.Entity.create(name=response['request']['name'],user_email=user_email)
     en = models.EntityNote.create(entity=e.id,user_email=user_email,note="Created by script.")
@@ -70,7 +70,7 @@ def health():
 @app.route('/', methods=['GET','POST'])
 def index():
     if request.method == 'GET':
-        payload = {"entities": [e.to_dict() for e in models.Entity.select()], "requester": request.environ.get('jwt_user_email', None) or 'fake@fake.dev'}
+        payload = {"entities": [e.to_dict() for e in models.Entity.select()], "requester": request.environ.get('HTTP_X_GOOG_AUTHENTICATED_USER_EMAIL', None) or 'fake@fake.dev'}
         return jsonify(payload)
 
     if request.method == 'POST':
