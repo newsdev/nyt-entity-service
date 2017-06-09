@@ -32,8 +32,20 @@ app = Flask(__name__, template_folder=settings.TEMPLATE_PATH)
 # app.wsgi_app = VerifyJWTMiddleware(app.wsgi_app)
 app.debug=settings.DEBUG
 
+@app.before_request
+def _db_connect():
+    models.database.connect()
+
+# This hook ensures that the connection is closed when we've finished
+# processing the request.
+@app.teardown_request
+def _db_close(exc):
+    if not models.database.is_closed():
+        models.database.close()
+
 models.database.connect()
 models.database.create_tables([models.Entity, models.EntityNote], safe=True)
+models.database.close()
 
 def create_entity(response):
     """
