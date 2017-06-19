@@ -1,8 +1,11 @@
 import os
 import re
+import importlib
 
 def get_env():
     return os.environ.get('DEPLOYMENT_ENVIRONMENT', 'dev')
+
+settings = importlib.import_module('config.%s.settings' % get_env())
 
 def valid_uuid(possible_uuid):
     """
@@ -36,3 +39,69 @@ def clean_payload(payload):
         # Values not in the test pass through.
         output[k] = v
     return output
+
+def get_page(request):
+    try:
+        page = int(request.args.get('page', '1'))
+    except TypeError:
+        page = 1
+
+    return page
+
+def paginate(request, obj_count, page, context):
+    context['page'] = page
+
+    total_pages = int(obj_count) // int(settings.ITEMS_PER_PAGE)
+    remainder = int(obj_count) % int(settings.ITEMS_PER_PAGE)
+
+    if remainder > 0:
+        total_pages += 1
+
+    previous_page = page - 1
+    next_page = page + 1
+    has_next = True
+    has_previous = True
+
+    if previous_page < 1:
+        previous_page = 1
+        has_previous = False
+
+    if next_page > total_pages:
+        next_page = total_pages
+        has_next = False
+
+    last_item = page * settings.ITEMS_PER_PAGE
+
+    if not has_next:
+        last_item = obj_count
+
+    if not has_previous:
+        first_item = 1
+
+    else:
+        first_item = (settings.ITEMS_PER_PAGE * (page - 1)) + 1
+
+    context['pagination'] = {
+        'last_item': last_item,
+        'first_item': first_item,
+        'remainder': remainder,
+        'total': obj_count,
+        'has_next': has_next,
+        'has_previous': has_previous,
+        'page': page,
+        'total_pages': total_pages,
+        'previous_page_number': previous_page,
+        'next_page_number': next_page,
+        'pages': list(range(1,total_pages + 1))
+    }
+
+    return context
+
+def build_context(request):
+    """
+    We needed some static context for our pages and
+    you won't believe what happened next.
+    """
+    context = {}
+    context['user_email'] = request.environ.get('HTTP_X_GOOG_AUTHENTICATED_USER_EMAIL', None) or 'test@test.dev'
+    return context

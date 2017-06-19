@@ -70,8 +70,21 @@ def health():
 @app.route('/', methods=['GET','POST'])
 def index():
     if request.method == 'GET':
-        payload = {"entities": [e.to_dict() for e in models.Entity.select()], "requester": request.environ.get('HTTP_X_GOOG_AUTHENTICATED_USER_EMAIL', None) or 'fake@fake.dev'}
-        return jsonify(payload)
+
+        context = utils.build_context(request)
+        page = utils.get_page(request)
+
+        all_entities = models.Entity.select()\
+                            .where(models.Entity.active == True)\
+                            .where(models.Entity.canonical_entity >> None)
+
+        context['entities'] = all_entities\
+                            .order_by(models.Entity.created.desc())\
+                            .paginate(page, settings.ITEMS_PER_PAGE)
+
+        context = utils.paginate(request, all_entities.count(), page, context)
+
+        return render_template('entity_list.html', **context)
 
     if request.method == 'POST':
         payload = utils.clean_payload(dict(request.form))
@@ -109,6 +122,23 @@ def index():
         response['response']['uuid'] = lookup[name]
 
         return jsonify(response)
+
+@app.route('/entity/set/canonical/', methods=['POST'])
+def set_canonical_entity():
+    if request.method == "POST":
+        payload = utils.clean_payload(dict(request.form))
+
+        if payload.get('entity', None) and payload.get('canonical_entity', None):
+            if utils.valid_uuid(payload['entity']) and utils.valid_uuid(payload['canonical_entity']):
+                e = models.Entity\
+                            .update(canonical_entity=payload['canonical_entity'])\
+                            .where(models.Entity.id==payload['entity'])
+                e.execute()
+                return(jsonify({"entity": payload['entity'], "canonical_entity": payload['canonical_entity']}));
+
+            return Response('bad request', 400)
+        return Response('bad request', 400)
+    return Response('bad request', 400)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

@@ -28,12 +28,14 @@ class BaseModel(Model):
 class Entity(BaseModel):
     id = UUIDField(primary_key=True)
     name = CharField(max_length=255, unique=True)
-    canonical_entity = TextField(null=True)
+    canonical_entity = CharField(max_length=255, null=True)
+
+    def related_entities(self):
+        return Entity.select().where(Entity.canonical_entity==self.id)
 
     def to_dict(self):
         payload = self.__dict__['_data']
         payload['notes'] = self.notes_dict()
-
         return payload
 
     def notes(self):

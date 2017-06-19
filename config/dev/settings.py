@@ -5,7 +5,9 @@ from peewee import *
 import utils
 
 DEBUG=True
-TEMPLATE_PATH = '%s/templates/' % os.path.dirname(os.path.realpath(__file__))
+TEMPLATE_PATH = '%s/templates/' % os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+ITEMS_PER_PAGE = 50
 
 DATABASES = {
     'default': {

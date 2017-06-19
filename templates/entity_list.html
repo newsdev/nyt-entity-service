@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if pagination.has_next or pagination.has_previous %}
+<div class="row">
+  <div class="col-md-12">
+    <nav>
+      <ul class="pagination">
+        {% if pagination.has_previous %}
+            <li class="page-item">
+                <a href="?page={{ pagination.previous_page_number }}" class="prev">&larr; previous</a>
+              </li>
+        {% endif %}
+        {% for p in pagination.pages %}
+            {% if p %}
+                {% if p == page %}
+                    <li class="page-item active"><span class="current page">{{ p }}</span></li>
+                {% else %}
+                    <li class="page-item"><a href="?page={{ p }}" class="page">{{ p }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+            <li class="page-item"><a href="?page={{ pagination.next_page_number }}" class="next">next &rarr;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-md-12">
+
+    {% for e in entities %}
+    <div style="min-height:5px;background-color:#ccc;" class="draggable" data-name="{{ e.name }}" data-id="{{ e.id }}">
+
+      <div class="entity" data-name="{{ e.name }}" data-id="{{ e.id }}">{{ e.name }}</div>
+
+    </div>
+    <div style="min-height:5px;background-color:pink;" class="droppable" data-name="{{ e.name }}" data-id="{{ e.id }}">
+      {% if e.related_entities() %}
+        {% for r in e.related_entities() %}
+          <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}</div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+$(function(){
+  var update_canonical_entity = function(response) {
+    console.log(response);
+  };
+
+  var assign_canonical_entity = function(entity, canonical_entity) {
+    data = {}
+    data['entity'] = entity;
+    data['canonical_entity'] = canonical_entity;
+    $.ajax({
+      type: "POST",
+      url: '/entity/set/canonical/',
+      data: data,
+      success: function(response){
+        update_canonical_entity(response);
+      },
+      dataType: 'JSON'
+    });
+  };
+
+  // Initialize draggables.
+  var containers = []
+  _.each(document.querySelectorAll('.draggable, .droppable'), function(el, index, list){ containers.push(el); });
+  var drake = dragula(containers);
+
+  // Initialize drag handler
+  drake.on('drop', function(el, target, source, sibling){
+    var entity = $(el).attr('data-id');
+    var canonical_entity = $(target).attr('data-id');
+    assign_canonical_entity(entity, canonical_entity);
+  });
+});
+</script>
+{% endblock %}
