@@ -90,3 +90,10 @@ ENV/
 
 # Secrets
 *-secrets.json
+
+bin/
+include/
+test_*
+.vscode/
+pyvenv.cfg
+src/
