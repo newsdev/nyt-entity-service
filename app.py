@@ -127,14 +127,26 @@ def index():
 def set_canonical_entity():
     if request.method == "POST":
         payload = utils.clean_payload(dict(request.form))
+        print("Payload: ", payload)
 
         if payload.get('entity', None) and payload.get('canonical_entity', None):
             if utils.valid_uuid(payload['entity']) and utils.valid_uuid(payload['canonical_entity']):
-                e = models.Entity\
-                            .update(canonical_entity=payload['canonical_entity'])\
+                # If payload['entity'] == payload['canonical_entity'],
+                # then the user moved an entity back to where it was originally
+                # placed on the page. This could signify the user rectifying
+                # a mistake in placement.
+                if payload['entity'] == payload['canonical_entity']:
+                    e = models.Entity\
+                            .update(canonical_entity=None)\
                             .where(models.Entity.id==payload['entity'])
-                e.execute()
-                return(jsonify({"entity": payload['entity'], "canonical_entity": payload['canonical_entity']}));
+                    e.execute()
+                    return(jsonify({"entity": payload['entity'], "canonical_entity": None}))
+                else:
+                    e = models.Entity\
+                                .update(canonical_entity=payload['canonical_entity'])\
+                                .where(models.Entity.id==payload['entity'])
+                    e.execute()
+                    return(jsonify({"entity": payload['entity'], "canonical_entity": payload['canonical_entity']}))
 
             return Response('bad request', 400)
         return Response('bad request', 400)
