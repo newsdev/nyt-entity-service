@@ -68,9 +68,8 @@
 {% block extrajs %}
 <script type="text/javascript">
 $(function(){
-  var update_canonical_entity = function(response, el) {
+  var update_canonical_entity = function(response) {
     console.log(response);
-    console.log(el);
   };
 
   var assign_canonical_entity = function(entity, canonical_entity, el) {
@@ -121,8 +120,15 @@ $(function(){
 
   // Initialize drag handler
   drake.on('drop', function(el, target, source, sibling){
-    var entity = $(el).attr('data-id');
-    var canonical_entity = $(target).attr('data-id');
+    var $el = $(el);
+    var $target = $(target);
+    var entity = $el.attr('data-id');
+    var canonical_entity = $target.attr('data-id');
+
+    if (!$el.hasClass('related-entity')) {
+      $el.addClass('related-entity');
+    }
+
     assign_canonical_entity(entity, canonical_entity, el);
   });
 });
