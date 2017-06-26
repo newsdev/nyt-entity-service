@@ -39,7 +39,7 @@
       <div class="entity" data-name="{{ e.name }}" data-id="{{ e.id }}">{{ e.name }}</div>
 
     </div>
-    <div style="min-height:5px;background-color:pink;" class="droppable" data-name="{{ e.name }}" data-id="{{ e.id }}">
+    <div style="min-height:15px;background-color:pink;" class="droppable" data-name="{{ e.name }}" data-id="{{ e.id }}">
       {% if e.related_entities() %}
         {% for r in e.related_entities() %}
           <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}
@@ -106,7 +106,9 @@ $(function(){
   // Initialize draggables.
   var containers = []
   _.each(document.querySelectorAll('.draggable, .droppable'), function(el, index, list){ containers.push(el); });
-  var drake = dragula(containers);
+  var drake = dragula(containers, {
+    revertOnSpill: true
+  });
 
   // Initialize drag handler
   drake.on('drop', function(el, target, source, sibling){
