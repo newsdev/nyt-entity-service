@@ -33,11 +33,43 @@
       .entity, .related-entity, .droppable, .draggable {
         min-height: 15px;
       }
+      .draggable, .droppable {
+        cursor: -webkit-grab;
+        cursor: -moz-grab;
+      }
       .draggable {
-        background-color: #ccc;
+        /*background-color: #ccc;*/
+        
       }
       .related-entity, .droppable {
-        background-color: pink;
+        /*background-color: pink;*/
+      }
+      .entity, .related-entity {
+        /*font-size: 16px;*/
+      }
+      .entity {
+        padding-bottom: 5px;
+        padding-top: 5px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .related-entity {
+       background-color: #ededed;
+       margin-bottom: 5px;
+       padding-left: 5px;
+       padding-right: 5px;
+       font-size: 16px;
+       font-weight: normal;
+      }
+      .row {
+        margin-top: 15px;
+      }
+      .mb-30 {
+        margin-bottom: 30px;
+      }
+      .my-h1 {
+        position: relative;
+        left: -15px;
       }
     </style>
   </head>

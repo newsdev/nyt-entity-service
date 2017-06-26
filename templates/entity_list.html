@@ -30,26 +30,35 @@
 </div>
 {% endif %}
 
-<div class="row">
-  <div class="col-md-12">
-
+<div class="row mb-30">
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-12">
+    <h1 class="my-h1">
+      Entities
+    </h1>
+    
     {% for e in entities %}
-    <div style="min-height:5px;background-color:#ccc;" class="draggable" data-name="{{ e.name }}" data-id="{{ e.id }}">
+    <div class="row">
+      <div  class="draggable" data-name="{{ e.name }}" data-id="{{ e.id }}">
 
-      <div class="entity" data-name="{{ e.name }}" data-id="{{ e.id }}">{{ e.name }}</div>
+        <div class="entity" data-name="{{ e.name }}" data-id="{{ e.id }}">{{ e.name }}</div>
 
-    </div>
-    <div style="min-height:15px;background-color:pink;" class="droppable" data-name="{{ e.name }}" data-id="{{ e.id }}">
-      {% if e.related_entities() %}
-        {% for r in e.related_entities() %}
-          <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}
-            <div class="remove-canonical-entity" style="float:right;cursor:pointer;" data-name="{{ r.name }}" data-id="{{ r.id }}">X</div>
-          </div>
-          
-        {% endfor %}
-      {% endif %}
+      </div>
+      <div  class="droppable col-md-12 offset-md-6" data-name="{{ e.name }}" data-id="{{ e.id }}">
+        {% if e.related_entities() %}
+          {% for r in e.related_entities() %}
+            <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}
+              <!--div class="remove-canonical-entity" style="float:right;cursor:pointer;" data-name="{{ r.name }}" data-id="{{ r.id }}">X</div-->
+              <button type="button" class="close" aria-label="Close">
+                <span class="remove-canonical-entity" aria-hidden="true" data-name="{{ r.name }}" data-id="{{ r.id }}">&times;</span>
+              </button>
+            </div>
+            
+          {% endfor %}
+        {% endif %}
+      </div>
     </div>
     {% endfor %}
+    
 
   </div>
 </div>
