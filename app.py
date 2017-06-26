@@ -127,7 +127,6 @@ def index():
 def set_canonical_entity():
     if request.method == "POST":
         payload = utils.clean_payload(dict(request.form))
-        print("Payload: ", payload)
 
         if payload.get('entity', None) and payload.get('canonical_entity', None):
             if utils.valid_uuid(payload['entity']) and utils.valid_uuid(payload['canonical_entity']):
@@ -147,6 +146,24 @@ def set_canonical_entity():
                                 .where(models.Entity.id==payload['entity'])
                     e.execute()
                     return(jsonify({"entity": payload['entity'], "canonical_entity": payload['canonical_entity']}))
+
+            return Response('bad request', 400)
+        return Response('bad request', 400)
+    return Response('bad request', 400)
+
+@app.route('/entity/remove/canonical/', methods=['POST'])
+def remove_canonical_entity():
+    if request.method == "POST":
+        payload = utils.clean_payload(dict(request.form))
+        print("Payload: ", payload)
+
+        if payload.get('entity', None):
+            if utils.valid_uuid(payload['entity']):
+                e = models.Entity\
+                        .update(canonical_entity=None)\
+                        .where(models.Entity.id==payload['entity'])
+                e.execute()
+                return(jsonify({"entity": payload['entity'], "canonical_entity": None}))
 
             return Response('bad request', 400)
         return Response('bad request', 400)

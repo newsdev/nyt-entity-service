@@ -42,7 +42,10 @@
     <div style="min-height:5px;background-color:pink;" class="droppable" data-name="{{ e.name }}" data-id="{{ e.id }}">
       {% if e.related_entities() %}
         {% for r in e.related_entities() %}
-          <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}</div>
+          <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}
+            <div class="remove-canonical-entity" style="float:right;cursor:pointer;" data-name="{{ r.name }}" data-id="{{ r.id }}">X</div>
+          </div>
+          
         {% endfor %}
       {% endif %}
     </div>
@@ -56,12 +59,13 @@
 {% block extrajs %}
 <script type="text/javascript">
 $(function(){
-  var update_canonical_entity = function(response) {
+  var update_canonical_entity = function(response, el) {
     console.log(response);
+    console.log(el);
   };
 
-  var assign_canonical_entity = function(entity, canonical_entity) {
-    data = {}
+  var assign_canonical_entity = function(entity, canonical_entity, el) {
+    var data = {}
     data['entity'] = entity;
     data['canonical_entity'] = canonical_entity;
     $.ajax({
@@ -69,11 +73,35 @@ $(function(){
       url: '/entity/set/canonical/',
       data: data,
       success: function(response){
-        update_canonical_entity(response);
+        update_canonical_entity(response, el);
       },
       dataType: 'JSON'
     });
   };
+
+  var remove_canonical_entity = function(entity) {
+    var data = {}
+    data['entity'] = entity;
+    $.ajax({
+      type: "POST",
+      url: '/entity/remove/canonical/',
+      data: data,
+      success: function(response) {
+        console.log('Removal response: ', response);
+      },
+      dataType: 'JSON'
+    });
+  }
+
+  // Initialize "Remove Canonical Entity" buttons with event listener.
+  _.each(document.querySelectorAll('.remove-canonical-entity'), function(el, index, list) { 
+    el.addEventListener("click", function(e) {
+      var entity = $(e.target).attr('data-id');
+      remove_canonical_entity(entity, e.target);
+    });
+   });
+
+
 
   // Initialize draggables.
   var containers = []
@@ -84,7 +112,7 @@ $(function(){
   drake.on('drop', function(el, target, source, sibling){
     var entity = $(el).attr('data-id');
     var canonical_entity = $(target).attr('data-id');
-    assign_canonical_entity(entity, canonical_entity);
+    assign_canonical_entity(entity, canonical_entity, el);
   });
 });
 </script>
