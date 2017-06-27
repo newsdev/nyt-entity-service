@@ -89,7 +89,7 @@ $(function(){
   };
 
   // AJAX call that removes the canonical id.
-  var remove_canonical_entity = function(entity) {
+  var remove_canonical_entity = function(entity, $el) {
     var data = {}
     data['entity'] = entity;
     $.ajax({
@@ -98,16 +98,18 @@ $(function(){
       data: data,
       success: function(response) {
         console.log('Removal response: ', response);
+        create_new_entity_row($el);
       },
       dataType: 'JSON'
     });
   }
 
   // Initialize "Remove Canonical Entity" buttons with event listener.
-  _.each(document.querySelectorAll('.remove-canonical-entity'), function(el, index, list) { 
-    el.addEventListener("click", function(e) {
-      var entity = $(e.target).attr('data-id');
-      remove_canonical_entity(entity, e.target);
+  _.each(document.querySelectorAll('.remove-canonical-entity'), function(el, index, list) {
+    var $el = $(el);
+    $el.click(function() {
+      var entity = $el.attr('data-id');
+      remove_canonical_entity(entity, $el);
     });
    });
 
@@ -119,12 +121,49 @@ $(function(){
   var drake = dragula(containers, {
     revertOnSpill: true, // Will only drop element if user has hovered over an acceptable target.
     accepts: function (el, target, source, sibling) {
-      //return (!($(el).attr('data-id') === $(target).attr('data-id'))) && // The dragged element and the target spot cannot have the same data-id.
-                //(target.classList.contains('droppable')); // The target spot must have the class 'droppable.'
-
       return target.classList.contains('droppable');
+    },
+    isContainer: function (el) {
+      return el.classList.contains('draggable') || el.classList.contains('droppable');
     }
   });
+
+  // Creates new entity row upon successful removal of a related entity.
+  var create_new_entity_row = function ($el) {
+    var target_spot = $el.parent().parent().parent().parent();
+    var el_to_destory = $el.parent().parent();
+
+    var row = $('<div/>', {
+      "class" : "row" 
+    });
+
+    var draggable = $('<div/>', {
+      "class" : "draggable",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id')
+    });
+
+    var entity = $('<div/>', {
+      "class" : "entity",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id'),
+      "text" : $el.attr('data-name')
+    });
+
+    var droppable = $('<div/>', {
+      "class" : "droppable col-md-12 offset-md-6",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id')
+    });
+
+    draggable.append(entity);
+    row.append(draggable);
+    row.append(droppable);
+
+    target_spot.after(row);
+    el_to_destory.remove();
+
+  }
 
   // Add or remove the 'related-entity' class on drop, based on existing classes.
   var change_class_entity = function ($el) {
@@ -154,7 +193,7 @@ $(function(){
     button.append(span);
     button.click(function() {
       var entity = $el.attr('data-id');
-      remove_canonical_entity(entity);
+      remove_canonical_entity(entity, $el);
     });
 
     $el.append(button);    
