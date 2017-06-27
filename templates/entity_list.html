@@ -69,7 +69,7 @@
 <script type="text/javascript">
 $(function(){
   var update_canonical_entity = function(response) {
-    console.log(response);
+    //console.log(response);
   };
 
   // AJAX call that assigns the canonical id.
@@ -117,10 +117,12 @@ $(function(){
   var containers = []
   _.each(document.querySelectorAll('.draggable, .droppable'), function(el, index, list){ containers.push(el); });
   var drake = dragula(containers, {
-    revertOnSpill: true,
+    revertOnSpill: true, // Will only drop element if user has hovered over an acceptable target.
     accepts: function (el, target, source, sibling) {
-      return (!($(el).attr('data-id') === $(target).attr('data-id'))) && // The dragged element and the target spot cannot have the same data-id.
-                (target.classList.contains('droppable')); // The target spot must have the class 'droppable.'
+      //return (!($(el).attr('data-id') === $(target).attr('data-id'))) && // The dragged element and the target spot cannot have the same data-id.
+                //(target.classList.contains('droppable')); // The target spot must have the class 'droppable.'
+
+      return target.classList.contains('droppable');
     }
   });
 
@@ -133,6 +135,31 @@ $(function(){
     }
   }
 
+  // Adds close button to entities that become related entities.
+  var add_close_button = function ($el) {
+    var button = $('<button/>', {
+      "type" : "button",
+      "class" : "close",
+      "aria-label": "Close"
+    });
+
+    var span = $('<span/>', {
+      "class" : "remove-canonical-entity",
+      "aria-hidden" : "true",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id'),
+      "html" : "&times;"
+    });
+
+    button.append(span);
+    button.click(function() {
+      var entity = $el.attr('data-id');
+      remove_canonical_entity(entity);
+    });
+
+    $el.append(button);    
+  }
+
   // Initialize drag handler
   drake.on('drop', function(el, target, source, sibling){
     var $el = $(el);
@@ -141,6 +168,7 @@ $(function(){
     var canonical_entity = $target.attr('data-id');
 
     change_class_entity($el);
+    add_close_button($el);
     assign_canonical_entity(entity, canonical_entity, el);
   });
 });
