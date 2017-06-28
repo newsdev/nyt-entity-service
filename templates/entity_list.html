@@ -31,7 +31,7 @@
 {% endif %}
 
 <div class="row mb-30">
-  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-12">
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-12" id="entities-container">
     <h1 class="my-h1">
       Entities
     </h1>
@@ -99,6 +99,8 @@ $(function(){
       success: function(response) {
         console.log('Removal response: ', response);
         create_new_entity_row($el);
+        remove_old_related_entity($el);
+        //check_for_row_removal($el);
       },
       dataType: 'JSON'
     });
@@ -128,10 +130,41 @@ $(function(){
     }
   });
 
+
+  var remove_old_related_entity = function ($el) {
+
+    console.log("$el to remove ", $el);
+
+    // $el = div = $el is the entity-turned-related-entity
+    // $el = span = $el is a related entity
+    if ($el.is("div")) { 
+      $el.remove();
+    } else {
+      $el.parent().parent().remove();
+    }
+
+  };
+
+  var find_current_row = function ($el) {
+
+    var $row;
+
+    console.log("$el ", $el);
+
+    // $el = div = $el is the entity-turned-related-entity
+    // $el = span = $el is a related entity
+    if ($el.is("div")) { 
+      $row = $el.parent().parent();
+    } else {
+      $row = $el.parent().parent().parent().parent();
+    }
+
+    return $row;
+  }
+
   // Creates new entity row upon successful removal of a related entity.
   var create_new_entity_row = function ($el) {
-    var target_spot = $el.parent().parent().parent().parent();
-    var el_to_destory = $el.parent().parent();
+    var current_row = find_current_row($el);
 
     var row = $('<div/>', {
       "class" : "row" 
@@ -160,8 +193,7 @@ $(function(){
     row.append(draggable);
     row.append(droppable);
 
-    target_spot.after(row);
-    el_to_destory.remove();
+    current_row.after(row);
 
   }
 
@@ -169,34 +201,34 @@ $(function(){
   var change_class_entity = function ($el) {
     if (!$el.hasClass('related-entity')) {
       $el.addClass('related-entity');
-    } else {
-      $el.removeClass('related-entity');
     }
   }
 
   // Adds close button to entities that become related entities.
   var add_close_button = function ($el) {
-    var button = $('<button/>', {
-      "type" : "button",
-      "class" : "close",
-      "aria-label": "Close"
-    });
+    if ($el.children().length <= 0) {
+      var button = $('<button/>', {
+        "type" : "button",
+        "class" : "close",
+        "aria-label": "Close"
+      });
 
-    var span = $('<span/>', {
-      "class" : "remove-canonical-entity",
-      "aria-hidden" : "true",
-      "data-name" : $el.attr('data-name'),
-      "data-id" : $el.attr('data-id'),
-      "html" : "&times;"
-    });
+      var span = $('<span/>', {
+        "class" : "remove-canonical-entity",
+        "aria-hidden" : "true",
+        "data-name" : $el.attr('data-name'),
+        "data-id" : $el.attr('data-id'),
+        "html" : "&times;"
+      });
 
-    button.append(span);
-    button.click(function() {
-      var entity = $el.attr('data-id');
-      remove_canonical_entity(entity, $el);
-    });
+      button.append(span);
+      span.click(function() {
+        var entity = $el.attr('data-id');
+        remove_canonical_entity(entity, $el);
+      });
 
-    $el.append(button);    
+      $el.append(button); 
+    }   
   }
 
   // Initialize drag handler
@@ -206,8 +238,8 @@ $(function(){
     var entity = $el.attr('data-id');
     var canonical_entity = $target.attr('data-id');
 
-    change_class_entity($el);
-    add_close_button($el);
+    change_class_entity($el); // Work on moving these to success method of AJAX call
+    add_close_button($el); // Work on moving these to success method of AJAX call
     assign_canonical_entity(entity, canonical_entity, el);
   });
 });
