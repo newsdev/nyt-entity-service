@@ -134,8 +134,6 @@ $(function(){
   var remove_empty_rows = function () {
     var $all_rows = $('#entities-container').find('.row');
 
-    console.log("$all_rows ", $all_rows);
-
     $all_rows.each(function(index, row) {
       var $row = $(row);
       if (($row.find('.draggable').children().length == 0) && ($row.find('.droppable').children().length == 0)) {
