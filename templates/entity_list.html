@@ -100,11 +100,11 @@ $(function(){
         console.log('Removal response: ', response);
         create_new_entity_row($el);
         remove_old_related_entity($el);
-        //check_for_row_removal($el);
       },
       dataType: 'JSON'
     });
   }
+
 
   // Initialize "Remove Canonical Entity" buttons with event listener.
   _.each(document.querySelectorAll('.remove-canonical-entity'), function(el, index, list) {
@@ -114,7 +114,6 @@ $(function(){
       remove_canonical_entity(entity, $el);
     });
    });
-
 
 
   // Initialize draggables.
@@ -131,9 +130,24 @@ $(function(){
   });
 
 
-  var remove_old_related_entity = function ($el) {
+  // Iterates through all row sto remove any without an original entity nor related entities.
+  var remove_empty_rows = function () {
+    var $all_rows = $('#entities-container').find('.row');
 
-    console.log("$el to remove ", $el);
+    console.log("$all_rows ", $all_rows);
+
+    $all_rows.each(function(index, row) {
+      var $row = $(row);
+      if (($row.find('.draggable').children().length == 0) && ($row.find('.droppable').children().length == 0)) {
+        $row.remove();
+      }
+    });
+
+  };
+
+
+  // Removes related-entity entry upon pressing X button.
+  var remove_old_related_entity = function ($el) {
 
     // $el = div = $el is the entity-turned-related-entity
     // $el = span = $el is a related entity
@@ -145,11 +159,11 @@ $(function(){
 
   };
 
+
+  // Finds the row in which the passed-in element ($el) exists.
   var find_current_row = function ($el) {
 
     var $row;
-
-    console.log("$el ", $el);
 
     // $el = div = $el is the entity-turned-related-entity
     // $el = span = $el is a related entity
@@ -161,6 +175,7 @@ $(function(){
 
     return $row;
   }
+
 
   // Creates new entity row upon successful removal of a related entity.
   var create_new_entity_row = function ($el) {
@@ -197,12 +212,14 @@ $(function(){
 
   }
 
+
   // Add or remove the 'related-entity' class on drop, based on existing classes.
   var change_class_entity = function ($el) {
     if (!$el.hasClass('related-entity')) {
       $el.addClass('related-entity');
     }
   }
+
 
   // Adds close button to entities that become related entities.
   var add_close_button = function ($el) {
@@ -231,6 +248,7 @@ $(function(){
     }   
   }
 
+
   // Initialize drag handler
   drake.on('drop', function(el, target, source, sibling){
     var $el = $(el);
@@ -241,6 +259,7 @@ $(function(){
     change_class_entity($el); // Work on moving these to success method of AJAX call
     add_close_button($el); // Work on moving these to success method of AJAX call
     assign_canonical_entity(entity, canonical_entity, el);
+    remove_empty_rows();
   });
 });
 </script>
