@@ -35,6 +35,11 @@
     <h1 class="my-h1">
       Entities
     </h1>
+
+    <div class="input-group">
+      <span class="glyphicon glyphicon-search input-group-addon" aria-hidden="true"></span>
+      <input type="text" class="form-control" id="search_bar" placeholder="Search for entity (case sensitive)" aria-describedby="basic-addon1">
+    </div>
     
     {% for e in entities %}
     <div class="row">
@@ -69,7 +74,7 @@
 <script type="text/javascript">
 $(function(){
   var update_canonical_entity = function(response) {
-    //console.log(response);
+    console.log(response);
   };
 
   // AJAX call that assigns the canonical id.
@@ -130,7 +135,7 @@ $(function(){
   });
 
 
-  // Iterates through all row sto remove any without an original entity nor related entities.
+  // Iterates through all rows to remove any without an original entity nor related entities.
   var remove_empty_rows = function () {
     var $all_rows = $('#entities-container').find('.row');
 
@@ -244,8 +249,32 @@ $(function(){
 
       $el.append(button); 
     }   
-  }
+  };
 
+  // Filters through rows to only display items related to the search input.
+  var filter_search_results = function () {
+    var $input, filter, $all_rows;
+
+    $input = $('#search_bar');
+    filter = $input.val();
+    $all_rows = $('#entities-container').find('.row');
+
+    $all_rows.each(function(index, row) {
+      var $row = $(row);
+      var entity = $row.find('.draggable').attr('data-name');
+      
+      if (entity.indexOf(filter) > -1) {
+        $row.show();
+      } else {
+        $row.hide();
+      }
+    });
+
+  };
+
+  // Find search bar and attach event handler
+  var search_bar = $('#search_bar');
+  search_bar.on('keyup', filter_search_results);
 
   // Initialize drag handler
   drake.on('drop', function(el, target, source, sibling){
