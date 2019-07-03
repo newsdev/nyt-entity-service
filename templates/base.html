@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{% endblock %}NYT Entity Service</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="//static01.nyt.com/favicon.ico">
+    <link href="//typeface.nyt.com/css/nyt5/zam5nzz-d.css" rel="stylesheet" media="screen">
+    <link href="//int.nyt.com/cdn/adcom-nyt/0.2.0/dist/css/adcom-nyt.css" rel="stylesheet" media="screen">
+    <link href="//gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <style type="text/css">
+      .gu-mirror {
+        position: fixed !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
+        opacity: 0.8;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+        filter: alpha(opacity=80);
+      }
+      .gu-hide {
+        display: none !important;
+      }
+      .gu-unselectable {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+      }
+      .gu-transit {
+        opacity: 0.2;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+        filter: alpha(opacity=20);
+      }
+      .entity, .related-entity, .droppable, .draggable {
+        min-height: 15px;
+      }
+      .droppable {
+        background-color: #f6f6f6;
+        min-height: 30px;
+      }
+      .entity {
+        padding-bottom: 5px;
+        padding-top: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: -webkit-grab;
+        cursor: -moz-grab;
+      }
+      .related-entity {
+       background-color: #dbdbdb;
+       margin-top: 5px;
+       margin-bottom: 5px;
+       padding-left: 5px;
+       padding-right: 5px;
+       font-size: 16px;
+       font-weight: normal;
+      }
+      .row {
+        margin-top: 20px;
+      }
+      .mb-30 {
+        margin-bottom: 30px;
+      }
+      .my-h1 {
+        position: relative;
+        left: -15px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="navbar navbar-default navbar-primary">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">NYT Entity Service</a>
+        </div>
+        <ul class="nav navbar-nav navbar-left">
+          <li class="navbar-summary">
+            <span style="color: #333;font-weight:400;font-family: nyt-franklin;">
+                A web service for disambiguating and canonically storing entities.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="content" class="container">{% block content %}{% endblock %}</div>
+
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/bootstrap.min.js"></script>
+    <script src="//gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+    <script src="//int.nyt.com/cdn/adcom-nyt/0.2.6/dist/js/adcom-nyt.js"></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js'></script>
+
+    {% block extrajs %}{% endblock %}
+
+  </body>
+</html>

@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if pagination.has_next or pagination.has_previous %}
+<div class="row">
+  <div class="col-md-12">
+    <nav>
+      <ul class="pagination">
+        {% if pagination.has_previous %}
+            <li class="page-item">
+                <a href="?page={{ pagination.previous_page_number }}" class="prev">&larr; previous</a>
+              </li>
+        {% endif %}
+        {% for p in pagination.pages %}
+            {% if p %}
+                {% if p == page %}
+                    <li class="page-item active"><span class="current page">{{ p }}</span></li>
+                {% else %}
+                    <li class="page-item"><a href="?page={{ p }}" class="page">{{ p }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+            <li class="page-item"><a href="?page={{ pagination.next_page_number }}" class="next">next &rarr;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+{% endif %}
+
+<div class="row mb-30">
+  <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 col-xs-12" id="entities-container">
+    <h1 class="my-h1">
+      Entities
+    </h1>
+    
+    {% for e in entities %}
+    <div class="row">
+      <div  class="draggable" data-name="{{ e.name }}" data-id="{{ e.id }}">
+
+        <div class="entity" data-name="{{ e.name }}" data-id="{{ e.id }}">{{ e.name }}</div>
+
+      </div>
+      <div  class="droppable col-md-12 offset-md-6" data-name="{{ e.name }}" data-id="{{ e.id }}">
+        {% if e.related_entities() %}
+          {% for r in e.related_entities() %}
+            <div class="entity related-entity" data-name="{{ r.name }}" data-id="{{ r.id }}">{{ r.name }}
+              <!--div class="remove-canonical-entity" style="float:right;cursor:pointer;" data-name="{{ r.name }}" data-id="{{ r.id }}">X</div-->
+              <button type="button" class="close" aria-label="Close">
+                <span class="remove-canonical-entity" aria-hidden="true" data-name="{{ r.name }}" data-id="{{ r.id }}">&times;</span>
+              </button>
+            </div>
+            
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+$(function(){
+  var update_canonical_entity = function(response) {
+    //console.log(response);
+  };
+
+  // AJAX call that assigns the canonical id.
+  var assign_canonical_entity = function(entity, canonical_entity, el) {
+    var data = {}
+    data['entity'] = entity;
+    data['canonical_entity'] = canonical_entity;
+    $.ajax({
+      type: "POST",
+      url: '/entity/set/canonical/',
+      data: data,
+      success: function(response){
+        update_canonical_entity(response, el);
+      },
+      dataType: 'JSON'
+    });
+  };
+
+  // AJAX call that removes the canonical id.
+  var remove_canonical_entity = function(entity, $el) {
+    var data = {}
+    data['entity'] = entity;
+    $.ajax({
+      type: "POST",
+      url: '/entity/remove/canonical/',
+      data: data,
+      success: function(response) {
+        console.log('Removal response: ', response);
+        create_new_entity_row($el);
+        remove_old_related_entity($el);
+      },
+      dataType: 'JSON'
+    });
+  }
+
+
+  // Initialize "Remove Canonical Entity" buttons with event listener.
+  _.each(document.querySelectorAll('.remove-canonical-entity'), function(el, index, list) {
+    var $el = $(el);
+    $el.click(function() {
+      var entity = $el.attr('data-id');
+      remove_canonical_entity(entity, $el);
+    });
+   });
+
+
+  // Initialize draggables.
+  var containers = []
+  _.each(document.querySelectorAll('.draggable, .droppable'), function(el, index, list){ containers.push(el); });
+  var drake = dragula(containers, {
+    revertOnSpill: true, // Will only drop element if user has hovered over an acceptable target.
+    accepts: function (el, target, source, sibling) {
+      return target.classList.contains('droppable');
+    },
+    isContainer: function (el) {
+      return el.classList.contains('draggable') || el.classList.contains('droppable');
+    }
+  });
+
+
+  // Iterates through all row sto remove any without an original entity nor related entities.
+  var remove_empty_rows = function () {
+    var $all_rows = $('#entities-container').find('.row');
+
+    $all_rows.each(function(index, row) {
+      var $row = $(row);
+      if (($row.find('.draggable').children().length == 0) && ($row.find('.droppable').children().length == 0)) {
+        $row.remove();
+      }
+    });
+
+  };
+
+
+  // Removes related-entity entry upon pressing X button.
+  var remove_old_related_entity = function ($el) {
+
+    // $el = div = $el is the entity-turned-related-entity
+    // $el = span = $el is a related entity
+    if ($el.is("div")) { 
+      $el.remove();
+    } else {
+      $el.parent().parent().remove();
+    }
+
+  };
+
+
+  // Finds the row in which the passed-in element ($el) exists.
+  var find_current_row = function ($el) {
+
+    var $row;
+
+    // $el = div = $el is the entity-turned-related-entity
+    // $el = span = $el is a related entity
+    if ($el.is("div")) { 
+      $row = $el.parent().parent();
+    } else {
+      $row = $el.parent().parent().parent().parent();
+    }
+
+    return $row;
+  }
+
+
+  // Creates new entity row upon successful removal of a related entity.
+  var create_new_entity_row = function ($el) {
+    var current_row = find_current_row($el);
+
+    var row = $('<div/>', {
+      "class" : "row" 
+    });
+
+    var draggable = $('<div/>', {
+      "class" : "draggable",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id')
+    });
+
+    var entity = $('<div/>', {
+      "class" : "entity",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id'),
+      "text" : $el.attr('data-name')
+    });
+
+    var droppable = $('<div/>', {
+      "class" : "droppable col-md-12 offset-md-6",
+      "data-name" : $el.attr('data-name'),
+      "data-id" : $el.attr('data-id')
+    });
+
+    draggable.append(entity);
+    row.append(draggable);
+    row.append(droppable);
+
+    current_row.after(row);
+
+  }
+
+
+  // Add or remove the 'related-entity' class on drop, based on existing classes.
+  var change_class_entity = function ($el) {
+    if (!$el.hasClass('related-entity')) {
+      $el.addClass('related-entity');
+    }
+  }
+
+
+  // Adds close button to entities that become related entities.
+  var add_close_button = function ($el) {
+    if ($el.children().length <= 0) {
+      var button = $('<button/>', {
+        "type" : "button",
+        "class" : "close",
+        "aria-label": "Close"
+      });
+
+      var span = $('<span/>', {
+        "class" : "remove-canonical-entity",
+        "aria-hidden" : "true",
+        "data-name" : $el.attr('data-name'),
+        "data-id" : $el.attr('data-id'),
+        "html" : "&times;"
+      });
+
+      button.append(span);
+      span.click(function() {
+        var entity = $el.attr('data-id');
+        remove_canonical_entity(entity, $el);
+      });
+
+      $el.append(button); 
+    }   
+  }
+
+
+  // Initialize drag handler
+  drake.on('drop', function(el, target, source, sibling){
+    var $el = $(el);
+    var $target = $(target);
+    var entity = $el.attr('data-id');
+    var canonical_entity = $target.attr('data-id');
+
+    change_class_entity($el); // Work on moving these to success method of AJAX call
+    add_close_button($el); // Work on moving these to success method of AJAX call
+    assign_canonical_entity(entity, canonical_entity, el);
+    remove_empty_rows();
+  });
+});
+</script>
+{% endblock %}
